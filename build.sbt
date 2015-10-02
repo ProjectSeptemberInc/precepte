@@ -2,7 +2,7 @@ import play.PlayImport.PlayKeys._
 
 lazy val commonSettings =  Seq(
     organization := "com.mfglabs"
-  , version := "0.2.0-SNAPSHOT"
+  , version := "0.2.0.0"
   , scalaVersion := "2.11.7"
   , resolvers ++= Seq(
       "Scalaz Bintray Repo" at "http://dl.bintray.com/scalaz/releases"
@@ -11,6 +11,9 @@ lazy val commonSettings =  Seq(
     , "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots" //for play 2.3.9
   )
   , logLevel in update := Level.Warn
+  , bintrayOrganization := Some("projectseptemberinc")
+  // , bintrayReleaseOnPublish in ThisBuild := false
+  , licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0"))
 )
 
 lazy val strictScalac =
@@ -36,13 +39,13 @@ lazy val core =
     .settings(strictScalac)
     .settings(
       name := "precepte-core",
-      publishTo := {
-        val s3Repo = "s3://mfg-mvn-repo"
-        if (isSnapshot.value)
-          Some("snapshots" at s3Repo + "/snapshots")
-        else
-          Some("releases" at s3Repo + "/releases")
-      },
+      //publishTo := {
+      //  val s3Repo = "s3://mfg-mvn-repo"
+      //  if (isSnapshot.value)
+      //    Some("snapshots" at s3Repo + "/snapshots")
+      //  else
+      //    Some("releases" at s3Repo + "/releases")
+      //},
       libraryDependencies <+= (scalaVersion)("org.scala-lang" % "scala-reflect" % _),
       libraryDependencies ++= Seq(
           "com.chuusai"     %% "shapeless"        % "2.2.4"
@@ -57,13 +60,13 @@ lazy val coreScalaz =
     .settings(strictScalac)
     .settings(
       name := "precepte-core-scalaz",
-      publishTo := {
-        val s3Repo = "s3://mfg-mvn-repo"
-        if (isSnapshot.value)
-          Some("snapshots" at s3Repo + "/snapshots")
-        else
-          Some("releases" at s3Repo + "/releases")
-      },
+      // publishTo := {
+      //   val s3Repo = "s3://mfg-mvn-repo"
+      //   if (isSnapshot.value)
+      //     Some("snapshots" at s3Repo + "/snapshots")
+      //   else
+      //     Some("releases" at s3Repo + "/releases")
+      // },
       libraryDependencies <+= (scalaVersion)("org.scala-lang" % "scala-reflect" % _),
       libraryDependencies ++= Seq(
           "org.scalaz"      %% "scalaz-core"      % "7.1.0"
@@ -80,13 +83,13 @@ lazy val coreCats =
     .settings(strictScalac)
     .settings(
       name := "precepte-core-cats",
-      publishTo := {
-        val s3Repo = "s3://mfg-mvn-repo"
-        if (isSnapshot.value)
-          Some("snapshots" at s3Repo + "/snapshots")
-        else
-          Some("releases" at s3Repo + "/releases")
-      },
+      // publishTo := {
+      //   val s3Repo = "s3://mfg-mvn-repo"
+      //   if (isSnapshot.value)
+      //     Some("snapshots" at s3Repo + "/snapshots")
+      //   else
+      //     Some("releases" at s3Repo + "/releases")
+      // },
       libraryDependencies <+= (scalaVersion)("org.scala-lang" % "scala-reflect" % _),
       libraryDependencies ++= Seq(
           "org.spire-math"  %% "cats"             % "0.2.0"
@@ -121,13 +124,13 @@ lazy val influx =
     .settings(strictScalac)
     .settings(
       name := "precepte-influx",
-      publishTo := {
-        val s3Repo = "s3://mfg-mvn-repo"
-        if (isSnapshot.value)
-          Some("snapshots" at s3Repo + "/snapshots")
-        else
-          Some("releases" at s3Repo + "/releases")
-      },
+      // publishTo := {
+      //   val s3Repo = "s3://mfg-mvn-repo"
+      //   if (isSnapshot.value)
+      //     Some("snapshots" at s3Repo + "/snapshots")
+      //   else
+      //     Some("releases" at s3Repo + "/releases")
+      // },
       libraryDependencies ++= Seq(ws))
     .dependsOn(core)
 
@@ -137,13 +140,13 @@ lazy val logback =
     .settings(strictScalac)
     .settings(
       name := "precepte-logback",
-      publishTo := {
-        val s3Repo = "s3://mfg-mvn-repo"
-        if (isSnapshot.value)
-          Some("snapshots" at s3Repo + "/snapshots")
-        else
-          Some("releases" at s3Repo + "/releases")
-      },
+      // publishTo := {
+      //   val s3Repo = "s3://mfg-mvn-repo"
+      //   if (isSnapshot.value)
+      //     Some("snapshots" at s3Repo + "/snapshots")
+      //   else
+      //     Some("releases" at s3Repo + "/releases")
+      // },
       libraryDependencies ++= Seq(
         "ch.qos.logback" % "logback-classic" % "1.1.2",
         "net.logstash.logback" % "logstash-logback-encoder" % "4.2"))
@@ -154,13 +157,13 @@ lazy val play =
     .settings(commonSettings:_*)
     .settings(strictScalac)
     .settings(
-      publishTo := {
-        val s3Repo = "s3://mfg-mvn-repo"
-        if (isSnapshot.value)
-          Some("snapshots" at s3Repo + "/snapshots")
-        else
-          Some("releases" at s3Repo + "/releases")
-      },
+      // publishTo := {
+      //   val s3Repo = "s3://mfg-mvn-repo"
+      //   if (isSnapshot.value)
+      //     Some("snapshots" at s3Repo + "/snapshots")
+      //   else
+      //     Some("releases" at s3Repo + "/releases")
+      // },
       libraryDependencies += "com.typesafe.play" %% "play" % "2.3.9",
       name := "precepte-play")
     .dependsOn(core, influx)
@@ -170,13 +173,13 @@ lazy val stream =
     .settings(commonSettings:_*)
     .settings(strictScalac)
     .settings(
-      publishTo := {
-        val s3Repo = "s3://mfg-mvn-repo"
-        if (isSnapshot.value)
-          Some("snapshots" at s3Repo + "/snapshots")
-        else
-          Some("releases" at s3Repo + "/releases")
-      },
+      // publishTo := {
+      //   val s3Repo = "s3://mfg-mvn-repo"
+      //   if (isSnapshot.value)
+      //     Some("snapshots" at s3Repo + "/snapshots")
+      //   else
+      //     Some("releases" at s3Repo + "/releases")
+      // },
       libraryDependencies ++= Seq(
           "com.typesafe.akka" %% "akka-http-core-experimental" % "1.0"
         , "org.scalatest"     %%  "scalatest"                  % "2.2.1"  % "test"

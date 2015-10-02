@@ -56,15 +56,17 @@ import scala.annotation.tailrec
   *  // For now, we use scalaz (cats coming soon) so you need some monads from Scalaz
   *  import scala.concurrent.ExecutionContext.Implicits.global
   *  import scala.concurrent.Future
-  *  import scalaz.std.scalaFuture._
-  *  import scalaz.syntax.monad._
+  *  import cats.Applicative
+  *  import cats.std.future._
+  *  import cats.syntax.flatMap._
+  *  import cats.syntax.apply._
   *
   *  // import the default Precepte representation using our provided Tags & ManagedState type
   *  import precepte.default._
   *
   *  // create some effectful steps in which you can 
-  *  def f1 = Precepte(tags("simple.f1")){(_: ST[Unit]) => 1.point[Future]}
-  *  def f2(i: Int) = Precepte(tags("simple.f2")){(_: ST[Unit]) => s"foo $i".point[Future]}
+  *  def f1 = Precepte(tags("simple.f1")){(_: ST[Unit]) => Applicative[Future].pure(1)}
+  *  def f2(i: Int) = Precepte(tags("simple.f2")){(_: ST[Unit]) => Applicative[Future].pure("foo"+i)}
   *
   *  // Lazy definition of your effectful workflow
   *  val res = for {
