@@ -43,7 +43,7 @@ object Macros {
 
   def calleeMacro(c: Context) = {
   	import c.universe._
-  	q"""_root_.com.mfglabs.precepte.default.Callee(${c.internal.enclosingOwner.fullName})"""
+  	q"""_root_.com.mfglabs.precepte.corecats.default.Callee(${c.internal.enclosingOwner.fullName})"""
   }
 
   def paramMacro[T](c: Context)(t: c.Tree) = {

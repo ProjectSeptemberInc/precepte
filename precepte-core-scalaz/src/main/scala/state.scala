@@ -16,6 +16,7 @@ limitations under the License.
 
 package com.mfglabs
 package precepte
+package corescalaz
 
 import shapeless.{ Generic, HList, HNil, :: }
 import shapeless.ops.hlist.Selector
