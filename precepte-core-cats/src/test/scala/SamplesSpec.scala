@@ -49,6 +49,18 @@ class SamplesSpec extends FlatSpec with ScalaFutures {
 
   val env = BaseEnv(Host("localhost"), Environment.Test, Version("1.0"))
 
+  /** Metric Service
+    * Expecting no injection so UnmanagedState = Unit
+    */
+  class Metric {
+    // Type alias are always advised to make syntax nicer and help sometimes scalac with HK types
+    type Pre[A] = DefaultPre[Future, Unit, A]
+
+    // using a Precepte of future for the logger... yes this is expensive as it will as the exectx for a thread
+    // but let's be pure for samples :D
+    def metric(m: String): Pre[Unit] = Applicative[Pre].pure(println(m))
+  }
+
   /** Logger Service
     * Expecting no injection so UnmanagedState = Unit
     */
@@ -63,6 +75,10 @@ class SamplesSpec extends FlatSpec with ScalaFutures {
 
   case class Stuff(id: Long, name: String)
 
+  case class DBCtx(
+    logger: Logger
+  )
+
   /** DB Service
     * Expecting a logger injection so UnmanagedState = Logger
     */
@@ -71,12 +87,12 @@ class SamplesSpec extends FlatSpec with ScalaFutures {
     implicit val category = Category.Database
 
     // Type alias are always advised to make syntax nicer and help sometimes scalac with HK types
-    type Pre[A] = DefaultPre[Future, Logger, A]
+    type Pre[A] = DefaultPre[Future, DBCtx, A]
 
-    def findById(id: Long): Pre[Option[Stuff]] = PreMP { s:ST[Logger] =>
+    def findById(id: Long): Pre[Option[Stuff]] = PreMP { s:ST[DBCtx] =>
       for {
         // Logger returns a DefaultPre[Future, Unit, A] so you need to xmapState to convert injectors
-        _ <- s.um.info(s"searching $id").unify(s)
+        _ <- s.um.logger.info(s"searching $id").unify(s)
         // Performs a fake effect returning a value
         r <- Pre.liftF(Applicative[Future].pure(Some(Stuff(id, "toto"))))
       } yield (r)
@@ -88,22 +104,27 @@ class SamplesSpec extends FlatSpec with ScalaFutures {
   case class NotPaid(id: Long, amount: Double) extends PayResult
 
 
+  case class PayCtx(
+    logger: Logger,
+    metric: Metric
+  )
   // Payment Service that returns PreUnit
   class PayService {
     // PreMP uses this implicit category to build Précepte in this scope
     implicit object PaymentService extends Category("payment_service")
 
     // Type alias are always advised to make syntax nicer and help sometimes scalac with HK types
-    type Pre[A] = DefaultPre[Future, Logger, A]
+    type Pre[A] = DefaultPre[Future, PayCtx, A]
 
-    def pay(stuff: Stuff, amount: Double): Pre[PayResult] = PreMP { s:ST[Logger] =>
+    def pay(stuff: Stuff, amount: Double): Pre[PayResult] = PreMP { s:ST[PayCtx] =>
       // IsoState is meant to allow conversions between Précepte with different UnmanagedState
       // val iso = IsoState(s); import iso._
 
       for {
-        _ <- s.um.info(s"$stuff going to pay $amount").unify(s)
+        _ <- s.um.logger.info(s"$stuff going to pay $amount").unify(s)
+        _ <- s.um.metric.metric(s"$stuff going to pay $amount").unify(s)
         r <- Pre.liftF(Future(Paid(stuff.id, amount)))
-        _ <- s.um.info(s"$stuff paid $amount").unify(s)
+        _ <- s.um.logger.info(s"$stuff paid $amount").unify(s)
       } yield (r)
     }
   }
@@ -112,6 +133,7 @@ class SamplesSpec extends FlatSpec with ScalaFutures {
   case class Ctx (
     db: DB,
     logger: Logger,
+    metric: Metric,
     payment: PayService
   )
 
@@ -170,10 +192,11 @@ class SamplesSpec extends FlatSpec with ScalaFutures {
     // build context to be injected
     val db = new DB()
     val logger = new Logger()
+    val metric = new Metric()
     val payService = new PayService()
     val env = BaseEnv(Host("localhost"), Environment.Test, Version("1.0"))
     // inject context and initiate Span
-    val s0 = ST(Span.gen, env, Vector.empty, Ctx(db, logger, payService))
+    val s0 = ST(Span.gen, env, Vector.empty, Ctx(db, logger, metric, payService))
 
     // 3 - Execute
     val (graph, r) = p.graph(Graph.empty).eval(s0).futureValue

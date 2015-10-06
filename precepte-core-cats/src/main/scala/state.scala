@@ -18,12 +18,29 @@ package com.mfglabs
 package precepte
 package corecats
 
-import shapeless.{ Generic, HList, HNil, :: }
-import shapeless.ops.hlist.Selector
+import shapeless._
+import shapeless.ops.hlist.{ Selector, ToCoproduct }
+import shapeless.ops.coproduct.{ Basis }
 
 import scala.language.implicitConversions
 import scala.language.higherKinds
 
+trait SubList[Super <: HList, S <: HList] extends DepFn1[Super] with Serializable {
+  type Out = S
+}
+
+object SubList {
+
+  implicit def hnilSubList[Super <: HList] = new SubList[Super, HNil] {
+    def apply(s: Super) = HNil
+  }
+
+  implicit def normalSubList[H, Super <: HList, S <: HList](
+    implicit sel: Selector[Super, H], sub: SubList[Super, S]
+  ) = new SubList[Super, H :: S] {
+    def apply(s: Super): H :: sub.Out = sel(s) :: sub(s)
+  }
+}
 
 package object state {
 
@@ -36,22 +53,19 @@ package object state {
 
 
   implicit class UnifyState[Ta, MS, UMS, F[_], A](val p: Precepte[Ta, MS, UMS, F, A]) extends AnyVal {
-    def unify[UMS2, R <: HList](pivot: PState[Ta, MS, UMS2])(implicit gen: Generic.Aux[UMS2, R], sel: Selector[R, UMS]): Precepte[Ta, MS, UMS2, F, A] = {
-      p.xmapState[UMS2]((_:UMS) => pivot.um, (_:UMS2) => sel(gen.to(pivot.um)))
+    // def unify[UMS2, R <: HList](pivot: PState[Ta, MS, UMS2])(implicit gen: Generic.Aux[UMS2, R], sel: Selector[R, UMS]): Precepte[Ta, MS, UMS2, F, A] = {
+    //   p.xmapState[UMS2]((_:UMS) => pivot.um, (_:UMS2) => sel(gen.to(pivot.um)))
+    // }
+
+    def unify[UMS2, HL <: HList, C <: Coproduct, HL2 <: HList, C2 <: Coproduct](pivot: PState[Ta, MS, UMS2])(
+      implicit
+        gen: Generic.Aux[UMS, HL],
+        gen2: Generic.Aux[UMS2, HL2],
+        subList: SubList[HL2, HL]
+    ): Precepte[Ta, MS, UMS2, F, A] = {
+      p.xmapState[UMS2]((_:UMS) => pivot.um, (_:UMS2) => gen.from(subList(gen2.to(pivot.um))))
     }
 
   }
-
-  // implicit def UnifyStateUnitImpl[Ta, MS, UMS2, F[_], A](p: Precepte[Ta, MS, Unit, F, A])(
-  //   implicit pivot: PState[Ta, MS, UMS2]
-  // ): Precepte[Ta, MS, UMS2, F, A] = {
-  //   (new UnifyStateUnit(p)).unify(pivot)
-  // }
-
-  // implicit def UnifyStateImpl[Ta, MS, UMS, UMS2, F[_], A, R <: HList](p: Precepte[Ta, MS, UMS, F, A])(
-  //   implicit pivot: PState[Ta, MS, UMS2], gen: Generic.Aux[UMS2, R], sel: Selector[R, UMS]
-  // ) = {
-  //   (new UnifyState(p)).unify(pivot)
-  // }
 
 }
