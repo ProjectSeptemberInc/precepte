@@ -26,6 +26,8 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.time.{Millis, Seconds, Span => TSpan}
 
+import io.circe.jawn
+
 import scala.language.higherKinds
 
 class SamplesSpec extends FlatSpec with ScalaFutures {

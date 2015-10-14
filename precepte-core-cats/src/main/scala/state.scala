@@ -42,6 +42,23 @@ object SubList {
   }
 }
 
+trait SubListable[Super, Subsub] extends DepFn1[Super] with Serializable {
+  type Out = Subsub
+}
+
+object SubListable {
+
+  implicit def sublistable[Super, Subsub, SuperHL <: HList, SubHL <: HList](
+    implicit 
+      genSuper: Generic.Aux[Super, SuperHL],
+      genSub: Generic.Aux[Subsub, SubHL],
+      subList: SubList[SuperHL, SubHL]
+  ) = new SubListable[Super, Subsub] {
+    def apply(s: Super): Subsub = genSub.from(subList(genSuper.to(s)))
+  }
+
+}
+
 package object state {
 
   implicit class UnifyStateUnit[Ta, MS, F[_], A](val p: Precepte[Ta, MS, Unit, F, A]) extends AnyVal {
@@ -53,17 +70,12 @@ package object state {
 
 
   implicit class UnifyState[Ta, MS, UMS, F[_], A](val p: Precepte[Ta, MS, UMS, F, A]) extends AnyVal {
-    // def unify[UMS2, R <: HList](pivot: PState[Ta, MS, UMS2])(implicit gen: Generic.Aux[UMS2, R], sel: Selector[R, UMS]): Precepte[Ta, MS, UMS2, F, A] = {
-    //   p.xmapState[UMS2]((_:UMS) => pivot.um, (_:UMS2) => sel(gen.to(pivot.um)))
-    // }
 
     def unify[UMS2, HL <: HList, C <: Coproduct, HL2 <: HList, C2 <: Coproduct](pivot: PState[Ta, MS, UMS2])(
       implicit
-        gen: Generic.Aux[UMS, HL],
-        gen2: Generic.Aux[UMS2, HL2],
-        subList: SubList[HL2, HL]
+        sub: SubListable[UMS2, UMS]
     ): Precepte[Ta, MS, UMS2, F, A] = {
-      p.xmapState[UMS2]((_:UMS) => pivot.um, (_:UMS2) => gen.from(subList(gen2.to(pivot.um))))
+      p.xmapState[UMS2]((_:UMS) => pivot.um, (_:UMS2) => sub(pivot.um))
     }
 
   }
