@@ -2,7 +2,7 @@ import play.PlayImport.PlayKeys._
 
 lazy val commonSettings =  Seq(
     organization := "com.mfglabs"
-  , version := "0.1.5-SNAPSHOT"
+  , version := "0.2.0-SNAPSHOT"
   , scalaVersion := "2.11.7"
   , resolvers ++= Seq(
       "Scalaz Bintray Repo" at "http://dl.bintray.com/scalaz/releases"
@@ -48,12 +48,43 @@ lazy val core =
       name := "precepte-core",
       libraryDependencies <+= (scalaVersion)("org.scala-lang" % "scala-reflect" % _),
       libraryDependencies ++= Seq(
-          "org.scalaz"      %% "scalaz-core"      % "7.1.0"
-        , "com.chuusai"     %% "shapeless"        % "2.2.4"
+          "com.chuusai"     %% "shapeless"        % "2.2.4"
         , "org.scalatest"   %  "scalatest_2.11"   % "2.2.1"   % "test"
       ),
       javaOptions in (Test,run) += "-XX:+UseConcMarkSweepGC -XX:+UseParallelGC -XX:-UseGCOverheadLimit -Xmx8G"
     )
+
+lazy val coreCats =
+  project.in(file("precepte-core-cats"))
+    .settings(commonSettings:_*)
+    .settings(strictScalac)
+    .settings(publishSettings:_*)
+    .settings(
+      name := "precepte-core-cats",
+      libraryDependencies <+= (scalaVersion)("org.scala-lang" % "scala-reflect" % _),
+      libraryDependencies ++= Seq(
+          "org.spire-math"  %% "cats"             % "0.2.0"
+        , "org.scalatest"   %  "scalatest_2.11"   % "2.2.1"   % "test"
+      )
+    )
+    .dependsOn(core)
+
+
+lazy val coreScalaz =
+  project.in(file("precepte-core-scalaz"))
+    .settings(commonSettings:_*)
+    .settings(strictScalac)
+    .settings(publishSettings:_*)
+    .settings(
+      name := "precepte-core-scalaz",
+      libraryDependencies <+= (scalaVersion)("org.scala-lang" % "scala-reflect" % _),
+      libraryDependencies ++= Seq(
+          "org.scalaz"      %% "scalaz-core"      % "7.1.0"
+        , "org.scalatest"   %  "scalatest_2.11"   % "2.2.1"   % "test"
+      )
+    )
+    .dependsOn(core)
+
 
 lazy val sample =
   project.in(file("precepte-sample"))
