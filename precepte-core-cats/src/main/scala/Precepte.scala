@@ -450,7 +450,7 @@ private [precepte] case class SubStep[Ta, ManagedState, UnmanagedState, F[_], I,
 }
 
 
-object Precepte extends Implicits {
+trait Builder extends Implicits {
 
   def apply[Ta](_tags: Ta) =
     new PrecepteBuilder[Ta] {
@@ -459,10 +459,13 @@ object Precepte extends Implicits {
 
   def liftF[Ta, M, U, F[_], A](fa: F[A]): Precepte[Ta, M, U, F, A] =
     Suspend(fa)
+
+  def pure[Ta, M, U, F[_], A](a: A): Precepte[Ta, M, U, F, A] = Pre.pure(a)
 }
 
 /** A shorter but nicer name in the code :D */
-object Pre extends Implicits {
+object Precepte extends Builder
+object Pre extends Builder /*extends Implicits {
 
   def apply[Ta](_tags: Ta) =
     new PrecepteBuilder[Ta] {
@@ -471,7 +474,9 @@ object Pre extends Implicits {
 
   def liftF[Ta, M, U, F[_], A](fa: F[A]): Precepte[Ta, M, U, F, A] =
     Suspend(fa)
-}
+
+  def return[Ta, M, U, F[_], A](a: A): Precepte[Ta, M, U, F, A] = Return(a)
+}*/
 
 
 /**
