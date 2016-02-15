@@ -23,7 +23,7 @@ class CatsProcessSpec extends FlatSpec with ScalaFutures {
   import cats.Applicative
   import cats.std.future._
   import cats.syntax.flatMap._
-  import cats.syntax.apply._
+  import cats.syntax.cartesian._
   import cats.data.{XorT, StreamingT}
 
   import default._

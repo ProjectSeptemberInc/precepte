@@ -3,7 +3,7 @@ import play.PlayImport.PlayKeys._
 
 lazy val commonSettings =  Seq(
     organization := "com.mfglabs"
-  , version := "0.2.0.7"
+  , version := "0.2.0.8"
   , scalaVersion := "2.11.7"
   , resolvers ++= Seq(
       "Scalaz Bintray Repo" at "http://dl.bintray.com/scalaz/releases"
@@ -67,7 +67,7 @@ lazy val coreCats =
       name := "precepte-core-cats",
       libraryDependencies <+= (scalaVersion)("org.scala-lang" % "scala-reflect" % _),
       libraryDependencies ++= Seq(
-          "org.spire-math"  %% "cats"             % "0.2.0"
+          "org.typelevel"  %% "cats"             % "0.4.1"
         , "org.scalatest"   %  "scalatest_2.11"   % "2.2.1"   % "test"
       )
     )

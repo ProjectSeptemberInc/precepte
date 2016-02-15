@@ -39,7 +39,7 @@ package object corecats extends SubMeta {
       override def flatMap[A, B](m: Precepte[Ta, ManagedState, UnmanagedState, F, A])(f: A => Precepte[Ta, ManagedState, UnmanagedState, F, B]): Precepte[Ta, ManagedState, UnmanagedState, F, B] =
         m.flatMap(f)
 
-      override def ap[A, B](pa: Precepte[Ta, ManagedState, UnmanagedState, F, A])(pab: Precepte[Ta, ManagedState, UnmanagedState, F, A => B]): Precepte[Ta, ManagedState, UnmanagedState, F, B] = {
+      override def ap[A, B](pab: Precepte[Ta, ManagedState, UnmanagedState, F, A => B])(pa: Precepte[Ta, ManagedState, UnmanagedState, F, A]): Precepte[Ta, ManagedState, UnmanagedState, F, B] = {
         Apply(pa, pab)
       }
     }
@@ -52,16 +52,16 @@ package object corecats extends SubMeta {
     override def pure[A](a: A): F[A] = mo.pure(a)
     override def map[A, B](fa: F[A])(f: A => B): F[B] = mo.map(fa)(f)
     override def flatMap[A, B](fa: F[A])(f: A => F[B]): F[B] = mo.flatMap(fa)(f)
-    override def ap[A, B](fa: F[A])(fab: F[A => B]): F[B] = mo.ap(fa)(fab)
+    override def ap[A, B](fa: F[A])(fab: F[A => B]): F[B] = mo.ap(fab)(fa)
   }
 
   implicit def CatsMetaNat[F[_], G[_]](implicit nat: F ~> G) = new ~~>[F, G] {
     def apply[A](f: F[A]): G[A] = nat(f)
   }
 
-  implicit def CatsMetaIso[F[_], G[_]](implicit to: F ~> G, from: G ~> F) = new <~~>[F, G] {
-    def to[A](f: F[A]): G[A] = to(f)
-    def from[A](f: G[A]): F[A] = from(f)
+  implicit def CatsMetaIso[F[_], G[_]](implicit to0: F ~> G, from0: G ~> F) = new <~~>[F, G] {
+    def to[A](f: F[A]): G[A] = to0(f)
+    def from[A](f: G[A]): F[A] = from0(f)
   }
 
   /** allows to unapply a Precepte into a F[A] */
@@ -121,7 +121,7 @@ trait SubMeta {
   implicit def CatsMetaApplicative[F[_]](implicit mo: Applicative[F]) = new MetaApplicative[F] {
     override def pure[A](a: A): F[A] = mo.pure(a)
     override def map[A, B](fa: F[A])(f: A => B): F[B] = mo.map(fa)(f)
-    override def ap[A, B](fa: F[A])(fab: F[A => B]): F[B] = mo.ap(fa)(fab)
+    override def ap[A, B](fa: F[A])(fab: F[A => B]): F[B] = mo.ap(fab)(fa)
   }
 
 }
