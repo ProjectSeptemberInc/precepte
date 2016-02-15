@@ -1,8 +1,9 @@
 import play.PlayImport.PlayKeys._
 
+
 lazy val commonSettings =  Seq(
     organization := "com.mfglabs"
-  , version := "0.2.0-SNAPSHOT"
+  , version := "0.2.0.7"
   , scalaVersion := "2.11.7"
   , resolvers ++= Seq(
       "Scalaz Bintray Repo" at "http://dl.bintray.com/scalaz/releases"
@@ -11,7 +12,10 @@ lazy val commonSettings =  Seq(
     , "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots" //for play 2.3.9
   )
   , logLevel in update := Level.Warn
-)
+  // , publishSettings
+  , bintrayOrganization := Some("projectseptemberinc")
+  , licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0"))
+) ++ tutSettings :+ (tutTargetDirectory := baseDirectory.value / ".." / "documentation")
 
 lazy val strictScalac =
   scalacOptions ++= Seq(
@@ -30,14 +34,14 @@ lazy val strictScalac =
     //, "-Ywarn-unused-import"
 )
 
-lazy val publishSettings =
-   Seq(publishTo := {
-      val s3Repo = "s3://mfg-mvn-repo"
-      if (isSnapshot.value)
-        Some("snapshots" at s3Repo + "/snapshots")
-      else
-        Some("releases" at s3Repo + "/releases")
-    })
+lazy val publishSettings = Seq()
+   // Seq(publishTo := {
+   //    val s3Repo = "s3://mfg-mvn-repo"
+   //    if (isSnapshot.value)
+   //      Some("snapshots" at s3Repo + "/snapshots")
+   //    else
+   //      Some("releases" at s3Repo + "/releases")
+   //  })
 
 lazy val core =
   project.in(file("precepte-core"))
