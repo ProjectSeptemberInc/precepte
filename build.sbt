@@ -1,4 +1,4 @@
-import play.PlayImport.PlayKeys._
+// import play.PlayImport.PlayKeys._
 
 lazy val publishSettings =
    publishTo := {
@@ -12,15 +12,19 @@ lazy val publishSettings =
 lazy val commonSettings =  Seq(
     organization := "com.mfglabs"
   , version := "0.3.0-SNAPSHOT"
-  , scalaVersion := "2.11.7"
+  , scalaVersion := "2.11.8-tl-201604151108"
+  // , scalaVersion := "2.11.8"
+  , scalaBinaryVersion := "2.11"
   , resolvers ++= Seq(
       "Scalaz Bintray Repo" at "http://dl.bintray.com/scalaz/releases"
     , "Oncue Bintray Repo" at "http://dl.bintray.com/oncue/releases"
     , "Typesafe Releases" at "http://repo.typesafe.com/typesafe/releases/"  //for play 2.3.9
     , "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots" //for play 2.3.9
+    , "scalatl" at "http://milessabin.com/scalatl"
   )
   , logLevel in update := Level.Warn
   , publishSettings
+  , addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.7.1")
 ) ++ tutSettings :+ (tutTargetDirectory := baseDirectory.value / ".." / "documentation")
 
 lazy val strictScalac =
@@ -37,6 +41,8 @@ lazy val strictScalac =
     , "-Ywarn-numeric-widen"
     , "-Ywarn-value-discard"
     , "-Xfuture"
+    , "-language:higherKinds"
+    , "-Yhigher-order-unification"
     //, "-Ywarn-unused-import"
 )
 
@@ -163,3 +169,4 @@ lazy val root = project.in(file("."))
   .settings(noPublish:_*)
   .settings(name := "precepte-root")
   .aggregate(core, play, influx, logback, sample, stream, doc)
+
