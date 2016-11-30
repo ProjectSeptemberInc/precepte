@@ -26,6 +26,8 @@ case class Logback(env: BaseEnv, loggerName: String) {
 
   import net.logstash.logback.marker.Markers._
   import org.slf4j.LoggerFactory
+  import ch.qos.logback.core.util.StatusPrinter
+  import ch.qos.logback.classic.LoggerContext
 
   val logger = LoggerFactory.getLogger(loggerName)
 
@@ -47,16 +49,18 @@ case class Logback(env: BaseEnv, loggerName: String) {
         "parameters" -> ScMap(params:_*).asJava).asJava
     }
 
-    def debug(message: => String, params: (String, String)*): Unit =
+    def debug(message: => String, params: Seq[(String, String)] = Nil): Unit =
       logger.debug(appendEntries(p(params)), message)
-    def info(message: => String, params: (String, String)*): Unit =
+    def info(message: => String, params: Seq[(String, String)] = Nil): Unit =
       logger.info(appendEntries(p(params)), message)
-    def warn(message: => String, params: (String, String)*): Unit =
+    def warn(message: => String, params: Seq[(String, String)] = Nil): Unit =
       logger.warn(appendEntries(p(params)), message)
-    def error(message: => String, params: (String, String)*): Unit =
+    def error(message: => String, params: Seq[(String, String)] = Nil): Unit =
       logger.error(appendEntries(p(params)), message)
-    def error(message: => String, ex: Throwable, params: (String, String)*): Unit =
+    def error(message: => String, ex: Throwable, params: Seq[(String, String)]): Unit =
       logger.error(appendEntries(p(params)), message, ex)
+    def error(message: => String, ex: Throwable): Unit =
+      error(message, ex, Nil)
   }
 
 }

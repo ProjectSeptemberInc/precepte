@@ -38,7 +38,7 @@ object Macros {
 
   /** A macro creating at compile-time a sequence of (name, value) for the values you pass to it */
   def params[T](ts: T*): Seq[(String, String)] = macro Macros.paramsMacro[T]
-  def param[T](t: T): (String, String) = macro Macros.paramMacro[T]
+  def param[T](t: T): Seq[(String, String)] = macro Macros.paramMacro[T]
 
   def calleeMacro(c: Context) = {
     import c.universe._
@@ -49,7 +49,7 @@ object Macros {
     import c.universe._
     val name = t.symbol
     if(t.symbol != null && t.symbol.isTerm && (t.symbol.asTerm.isVal || t.symbol.asTerm.isVar))
-      q"""(${name.name.encodedName.toString} -> $name.toString)"""
+      q"""Seq(${name.name.encodedName.toString} -> $name.toString)"""
     else if(t.symbol == null)
       throw new scala.reflect.internal.FatalError(s"$t is not a val or a var")
     else
@@ -59,7 +59,7 @@ object Macros {
   def paramsMacro[T](c: Context)(ts: c.Tree*) = {
     import c.universe._
     val tuples = for(t <- ts) yield paramMacro(c)(t)
-    q"Seq(..$tuples)"
+    q"Seq(..$tuples).flatten"
   }
 
   def PreM[F[_], UM, A](f: DefaultPre[F, UM, A]#S => F[A])(implicit callee: Callee, category: Category): DefaultPre[F, UM, A] =

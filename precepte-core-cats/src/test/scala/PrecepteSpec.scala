@@ -513,7 +513,6 @@ class PrecepteSpec extends FlatSpec with ScalaFutures with Inside {
       def apply[A](f: F[A]): Future[A] = Applicative[Future].pure(f.a)
     }
 
-
     import scala.concurrent.Await
     import scala.concurrent.duration._
 
