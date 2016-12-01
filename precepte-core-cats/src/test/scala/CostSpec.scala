@@ -35,11 +35,11 @@ class CostSpec extends FlatSpec with ScalaFutures {
 
   import scala.concurrent.ExecutionContext.Implicits.global
   import scala.concurrent.Future
-  import cats.std.future._
+  import cats.instances.future._
   import cats.Applicative
   import cats.syntax.flatMap._
   import cats.syntax.apply._
-  import cats.data.XorT
+  import cats.data.EitherT
 
   import default._
 

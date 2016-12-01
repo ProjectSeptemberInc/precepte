@@ -12,7 +12,7 @@ lazy val publishSettings = Seq(
 
 lazy val commonSettings =  Seq(
     organization := "com.mfglabs"
-  , version := "0.4.3"
+  , version := "0.4.3_ps"
   , scalaVersion := "2.11.8"
   , resolvers ++= Seq(
       "Scalaz Bintray Repo" at "http://dl.bintray.com/scalaz/releases"
@@ -81,7 +81,7 @@ lazy val coreCats =
       name := "precepte-core-cats",
       libraryDependencies <+= (scalaVersion)("org.scala-lang" % "scala-reflect" % _),
       libraryDependencies ++= Seq(
-          "org.typelevel"  %% "cats"             % "0.4.1"
+          "org.typelevel"  %% "cats"             % "0.8.1"
         , "org.scalatest"   %  "scalatest_2.11"   % "2.2.1"   % "test"
       )
     )

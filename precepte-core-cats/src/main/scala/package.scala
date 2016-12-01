@@ -20,10 +20,12 @@ package precepte
 import scala.concurrent.Future
 
 import cats.{ Monad, Applicative, Functor, Semigroup, ~>, Unapply }
-import cats.data.{ OptionT, XorT, Xor, StreamingT }
+import cats.data.{ OptionT, EitherT }
+import cats.instances.either._
 import cats.syntax.apply._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
+import cats.syntax.either._
 
 import scala.language.higherKinds
 import scala.annotation.tailrec
@@ -42,6 +44,13 @@ package object corecats extends SubMeta {
       override def ap[A, B](pab: Precepte[Ta, ManagedState, UnmanagedState, F, A => B])(pa: Precepte[Ta, ManagedState, UnmanagedState, F, A]): Precepte[Ta, ManagedState, UnmanagedState, F, B] = {
         Apply(pa, pab)
       }
+
+      // unsafe
+      override def tailRecM[A, B](a: A)(f: A => Precepte[Ta, ManagedState, UnmanagedState, F, Either[A, B]]): Precepte[Ta, ManagedState, UnmanagedState, F, B] =
+        f(a).flatMap {
+          case Left(nextA)  => tailRecM(nextA)(f)
+          case Right(b)     => pure(b)
+        }
     }
 
   implicit def CatSemigroup[A](implicit sg: Semigroup[A]) = new MetaSemigroup[A] {
@@ -102,12 +111,12 @@ package object corecats extends SubMeta {
   //   def lift[F[_], A](f: F[StreamingT[A]]): StreamingT[F, A] = StreamingT.wait(f)
   // }
 
-  implicit def xorHasHoist[A]: HasHoist.Aux[({ type λ[α] = Xor[A, α] })#λ, ({ type λ[F[_], B] = XorT[F, A, B] })#λ] = new XorHasHoist[A]
+  implicit def eitherHasHoist[A]: HasHoist.Aux[({ type λ[α] = Either[A, α] })#λ, ({ type λ[F[_], B] = EitherT[F, A, B] })#λ] = new EitherHasHoist[A]
 
-  def future[Ta, M, U, A](ta: Ta)(λ: Precepte[Ta, M, U, Future, A]#S => Future[A])(implicit func: Functor[Future], ec: scala.concurrent.ExecutionContext): Precepte[Ta, M, U, Future, Xor[Throwable, A]] =
+  def future[Ta, M, U, A](ta: Ta)(λ: Precepte[Ta, M, U, Future, A]#S => Future[A])(implicit func: Functor[Future], ec: scala.concurrent.ExecutionContext): Precepte[Ta, M, U, Future, Either[Throwable, A]] =
     Precepte(ta){ pa =>
-      func.map(λ(pa))(Xor.Right(_))
-        .recover{ case e => Xor.Left(e) }
+      func.map(λ(pa))(Right(_))
+        .recover{ case e => Left(e) }
     }
 
 }

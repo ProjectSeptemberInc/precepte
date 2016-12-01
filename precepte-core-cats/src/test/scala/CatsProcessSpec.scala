@@ -21,10 +21,10 @@ class CatsProcessSpec extends FlatSpec with ScalaFutures {
   import scala.concurrent.ExecutionContext.Implicits.global
   import scala.concurrent.Future
   import cats.Applicative
-  import cats.std.future._
+  import cats.instances.future._
   import cats.syntax.flatMap._
   import cats.syntax.cartesian._
-  import cats.data.{XorT, StreamingT}
+  import cats.data.EitherT
 
   import default._
 
